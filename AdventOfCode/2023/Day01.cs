@@ -10,24 +10,26 @@ public class Day01 : AdventBase
     protected override object InternalPart1()
     {
         var answer = this.Input.Lines
-            .Select(l => l.Where(c => c >= FirstNum && c <= LastNum).ToList())
-            .Select(nums => int.Parse($"{nums[0]}{nums[^1]}"))
+            .Select(line =>
+                {
+                    int firstNum = GetPart1FirstNum(line);
+                    int lastNum = GetPart1FirstNum(ReverseString(line));
+                    
+                    return int.Parse($"{firstNum}{lastNum}");
+                }
+            )
             .Sum();
 
         return answer;
     }
-
+    
     protected override object InternalPart2()
     {
         var answer = this.Input.Lines
             .Select(line =>
                 {
-                    int firstNum = GetFirstNum(line);
-                    int lastNum = GetLastNum(string.Create(line.Length, line, (chars, state) =>
-                    {
-                        state.AsSpan().CopyTo(chars);
-                        chars.Reverse();
-                    }));
+                    int firstNum = GetPart2FirstNum(line);
+                    int lastNum = GetPart2LastNum(ReverseString(line));
                     
                     return int.Parse($"{firstNum}{lastNum}");
                 }
@@ -37,7 +39,30 @@ public class Day01 : AdventBase
         return answer;
     }
 
-    private int GetFirstNum(ReadOnlySpan<char> input)
+    private static string ReverseString(string input)
+    {
+        return string.Create(input.Length, input, (chars, state) =>
+        {
+            state.AsSpan().CopyTo(chars);
+            chars.Reverse();
+        });
+    }
+
+    private int GetPart1FirstNum(ReadOnlySpan<char> input)
+    {
+        for (int index = 0; index < input.Length; index++)
+        {
+            char c = input[index];
+            if (c >= FirstNum && c <= LastNum)
+            {
+                return int.Parse(c.ToString());
+            }
+        }
+        
+        throw new InvalidDataException("Could not find number in line");
+    }
+
+    private int GetPart2FirstNum(ReadOnlySpan<char> input)
     {
         for (int index = 0; index < input.Length; index++)
         {
@@ -73,7 +98,7 @@ public class Day01 : AdventBase
         throw new InvalidDataException("Could not find number in line");
     }
 
-    private int GetLastNum(ReadOnlySpan<char> input)
+    private int GetPart2LastNum(ReadOnlySpan<char> input)
     {
         for (int index = 0; index < input.Length; index++)
         {
